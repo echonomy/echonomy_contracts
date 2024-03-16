@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./EchonomySong.sol";
 
 contract EchonomySongRegistry {
-    uint256 private _nextSongId;
+    uint256 private _nextSongId = 1;
     mapping(uint256 => EchonomySong) private _songs;
     mapping(uint256 => address payable) private _songOwners;
     mapping(uint256 => uint256) private _songPrices;
@@ -44,5 +44,13 @@ contract EchonomySongRegistry {
 
     function getSongOwner(uint256 index) public view returns (address) {
         return _songOwners[index];
+    }
+
+    function getSongPrice(uint256 index) public view returns (uint256) {
+        return _songPrices[index];
+    }
+
+    function getSongCount() public view returns (uint256) {
+        return _nextSongId - 1;
     }
 }
