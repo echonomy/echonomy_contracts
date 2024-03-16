@@ -14,14 +14,16 @@ contract EchonomySongRegistry {
     mapping(uint256 => uint256) private _songPrices;
     mapping(address => uint256) private _withdrawableBalance;
     
-    function createSongContract(string memory name, uint256 price) public {
+    function createSongContract(string memory name, uint256 price) public returns (uint256) {
+        uint256 songId = _nextSongId;
         // TODO: dynamically construct the baseURI
         EchonomySong newSong = new EchonomySong(address(this), name, 
             string.concat("https://echonomy.vercel.app/api/v1/nft-metadata/", Strings.toString(_nextSongId), "/"));
-        _songs[_nextSongId] = newSong;
-        _songOwners[_nextSongId] = payable(msg.sender);
-        _songPrices[_nextSongId] = price;
+        _songs[songId] = newSong;
+        _songOwners[songId] = payable(msg.sender);
+        _songPrices[songId] = price;
         _nextSongId++;
+        return songId;
     }
 
     function mintSong(uint256 index, address to) public payable {
@@ -38,19 +40,23 @@ contract EchonomySongRegistry {
         payable(msg.sender).transfer(amount);
     }
 
-    function getSong(uint256 index) public view returns (EchonomySong) {
+    function withdrawableBalance(address owner) public view returns (uint256) {
+        return _withdrawableBalance[owner];
+    }
+
+    function song(uint256 index) public view returns (EchonomySong) {
         return _songs[index];
     }
 
-    function getSongOwner(uint256 index) public view returns (address) {
+    function songOwner(uint256 index) public view returns (address) {
         return _songOwners[index];
     }
 
-    function getSongPrice(uint256 index) public view returns (uint256) {
+    function songPrice(uint256 index) public view returns (uint256) {
         return _songPrices[index];
     }
 
-    function getSongCount() public view returns (uint256) {
+    function songCount() public view returns (uint256) {
         return _nextSongId - 1;
     }
 }
