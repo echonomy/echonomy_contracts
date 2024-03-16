@@ -13,22 +13,22 @@ contract EchonomySongTest is Test {
 
     function test_CreateSongContract() public {
         registry.createSongContract("Test Song", 100);
-        assertEq(registry.getSongCount(), 1);
-        assertEq(registry.getSongOwner(1), address(this));
-        assertEq(registry.getSongPrice(1), 100);
+        assertEq(registry.songCount(), 1);
+        assertEq(registry.songOwner(1), address(this));
+        assertEq(registry.songPrice(1), 100);
     }
 
     function test_CreateSongContract_WithPriceZero() public {
         registry.createSongContract("Test Song", 0);
-        assertEq(registry.getSongCount(), 1);
-        assertEq(registry.getSongOwner(1), address(this));
-        assertEq(registry.getSongPrice(1), 0);
+        assertEq(registry.songCount(), 1);
+        assertEq(registry.songOwner(1), address(this));
+        assertEq(registry.songPrice(1), 0);
     }
 
     function test_MintSong() public {
         registry.createSongContract("Test Song", 100);
         registry.mintSong{value: 100}(1, address(this));
-        assertEq(registry.getSong(1).balanceOf(address(this)), 1);
+        assertEq(registry.song(1).balanceOf(address(this)), 1);
     }
 
     function test_MintSong_WithIncorrectPayment() public {

@@ -29,8 +29,7 @@ contract EchonomySongRegistry {
     function mintSong(uint256 index, address to) public payable {
         require(msg.value == _songPrices[index], "EchonomySongRegistry: incorrect payment amount");
         _withdrawableBalance[_songOwners[index]] += msg.value;
-        EchonomySong song = _songs[index];
-        song.safeMint(to);
+        song(index).safeMint(to);
     }
 
     function withdraw() public {
