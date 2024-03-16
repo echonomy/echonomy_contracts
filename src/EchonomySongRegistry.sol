@@ -8,13 +8,15 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./EchonomySong.sol";
 
 contract EchonomySongRegistry {
+    event SongCreated(uint256 indexed songId, address indexed owner, uint256 price);
+
     uint256 private _nextSongId = 1;
     mapping(uint256 => EchonomySong) private _songs;
     mapping(uint256 => address payable) private _songOwners;
     mapping(uint256 => uint256) private _songPrices;
     mapping(address => uint256) private _withdrawableBalance;
     
-    function createSongContract(string memory name, uint256 price) public returns (uint256) {
+    function createSongContract(string memory name, uint256 price) public {
         uint256 songId = _nextSongId;
         // TODO: dynamically construct the baseURI
         EchonomySong newSong = new EchonomySong(address(this), name, 
@@ -23,7 +25,7 @@ contract EchonomySongRegistry {
         _songOwners[songId] = payable(msg.sender);
         _songPrices[songId] = price;
         _nextSongId++;
-        return songId;
+        emit SongCreated(songId, msg.sender, price);
     }
 
     function mintSong(uint256 index, address to) public payable {
