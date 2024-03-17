@@ -11,27 +11,27 @@ contract EchonomySongRegistry {
     event SongCreated(uint256 indexed songId, address indexed owner, uint256 price);
 
     uint256 private _nextSongId = 1;
-    mapping(uint256 => EchonomySong) private _songs;
-    mapping(uint256 => address payable) private _songOwners;
-    mapping(uint256 => uint256) private _songPrices;
+    mapping(uint256 => address payable) private _songArtist;
+    mapping(uint256 => uint256) private _songPrice;
     mapping(address => uint256) private _withdrawableBalance;
+    mapping(uint256 => address[]) private _songOwners;
+    mapping(address => uint256[]) private _ownedSongs;
+    mapping(address => mapping(uint256 => bool)) private _ownsSong;
     
-    function createSongContract(string memory name, uint256 price) public {
+    function createSongContract(uint256 price) public {
         uint256 songId = _nextSongId;
-        // TODO: dynamically construct the baseURI
-        EchonomySong newSong = new EchonomySong(address(this), name, 
-            string.concat("https://echonomy.vercel.app/api/v1/nft-metadata/", Strings.toString(_nextSongId), "/"));
-        _songs[songId] = newSong;
-        _songOwners[songId] = payable(msg.sender);
-        _songPrices[songId] = price;
+        _songArtist[songId] = payable(msg.sender);
+        _songPrice[songId] = price;
         _nextSongId++;
         emit SongCreated(songId, msg.sender, price);
     }
 
-    function mintSong(uint256 index, address to) public payable {
-        require(msg.value == _songPrices[index], "EchonomySongRegistry: incorrect payment amount");
-        _withdrawableBalance[_songOwners[index]] += msg.value;
-        song(index).safeMint(to);
+    function buySong(uint256 index) public payable {
+        require(msg.value == _songPrice[index], "EchonomySongRegistry: incorrect payment amount");
+        _withdrawableBalance[_songArtist[index]] += msg.value;
+        _songOwners[index].push(msg.sender);
+        _ownedSongs[msg.sender].push(index);
+        _ownsSong[msg.sender][index] = true;
     }
 
     function withdraw() public {
@@ -45,16 +45,24 @@ contract EchonomySongRegistry {
         return _withdrawableBalance[owner];
     }
 
-    function song(uint256 index) public view returns (EchonomySong) {
-        return _songs[index];
-    }
-
-    function songOwner(uint256 index) public view returns (address) {
-        return _songOwners[index];
+    function songArtist(uint256 index) public view returns (address) {
+        return _songArtist[index];
     }
 
     function songPrice(uint256 index) public view returns (uint256) {
-        return _songPrices[index];
+        return _songPrice[index];
+    }
+
+    function ownsSong(address owner, uint256 index) public view returns (bool) {
+        return _ownsSong[owner][index];
+    }
+
+    function ownedSongs(address owner) public view returns (uint256[] memory) {
+        return _ownedSongs[owner];
+    }
+
+    function songOwners(uint256 index) public view returns (address[] memory) {
+        return _songOwners[index];
     }
 
     function songCount() public view returns (uint256) {
